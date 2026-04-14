@@ -12,3 +12,9 @@ export async function fetchTraceById(id: string) {
   const res = await fetch(`${baseUrl}queryguard/api/requests/${id}`);
   return res.json();
 }
+
+export async function fetchPrometheusMetrics(): Promise<string> {
+  const res = await fetch(`${baseUrl}actuator/prometheus`);
+  if (!res.ok) throw new Error("Failed to fetch Prometheus metrics");
+  return res.text();
+}
