@@ -1,10 +1,15 @@
+import Home from "./pages/Home";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import TraceDetail from "./pages/TraceDetail";
+
 function App() {
   return (
-    <div className="p-6">
-      <h1 className="text-3xl text-accent">
-        QueryGuard Dashboard
-      </h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/trace/:traceId" element={<TraceDetail />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
