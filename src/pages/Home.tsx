@@ -4,6 +4,8 @@ import { fetchTraces } from "../api/traceApi";
 import { type RequestTrace } from "../types/trace";
 import RequestTable from "../components/RequestTable";
 
+const logoUrl = `${import.meta.env.BASE_URL}logo.png`;
+
 const AUTO_REFRESH_OPTIONS = [
   { label: "Manual", value: 0 },
   { label: "Every 5s", value: 5_000 },
@@ -128,7 +130,7 @@ export default function Home() {
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <div className="flex items-center gap-3">
             <img
-              src="/logo.png"
+              src={logoUrl}
               alt=""
               className="h-9 w-9 rounded object-contain"
             />

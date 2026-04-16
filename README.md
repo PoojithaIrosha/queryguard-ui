@@ -30,6 +30,9 @@ The app is intended for local or internal observability workflows where engineer
 
 ```text
 .
+├── .env.development
+├── .env.example
+├── .env.production
 ├── public/
 │   ├── favicon.png
 │   ├── favicon.svg
@@ -63,9 +66,11 @@ The app is intended for local or internal observability workflows where engineer
 
 - `src/App.tsx` defines the route map:
   - `/` renders the request list.
+  - `/index.html` redirects to `/`.
   - `/dashboard` renders live metric charts.
   - `/trace/:traceId` renders a single trace timeline.
 - `src/api/traceApi.ts` centralizes backend calls.
+- `vite.config.ts` reads `VITE_QUERYGUARD_UI_BASE_PATH` and uses it as the Vite `base` path for generated asset URLs.
 - `src/types/trace.ts` defines the trace and query data contracts consumed across the UI.
 - `src/pages` contains route-level screens.
 - `src/components` contains reusable presentation and interaction components for tables, trace cards, and timelines.
@@ -106,6 +111,12 @@ Preview the production build locally:
 npm run preview
 ```
 
+With the current production base path, the previewed app is served under:
+
+```text
+http://localhost:4173/queryguard-ui/
+```
+
 Run lint checks:
 
 ```bash
@@ -114,11 +125,12 @@ npm run lint
 
 ## Environment Variables
 
-The application uses Vite environment variables for backend URL configuration.
+The application uses Vite environment variables for backend URL and frontend base-path configuration.
 
 | Variable | Required | Development | Production | Description |
 | --- | --- | --- | --- | --- |
 | `VITE_QUERYGUARD_API_BASE_URL` | Yes | `http://localhost:8080/` | `/` | Base URL used by the frontend API client. |
+| `VITE_QUERYGUARD_UI_BASE_PATH` | Yes | `/` | `/queryguard-ui/` | Base path used for built assets and React Router. |
 
 Vite loads the correct file by mode:
 
@@ -130,14 +142,16 @@ Current environment files:
 ```bash
 # .env.development
 VITE_QUERYGUARD_API_BASE_URL=http://localhost:8080/
+VITE_QUERYGUARD_UI_BASE_PATH=/
 ```
 
 ```bash
 # .env.production
 VITE_QUERYGUARD_API_BASE_URL=/
+VITE_QUERYGUARD_UI_BASE_PATH=/queryguard-ui/
 ```
 
-The production value is `/` because production builds are intended to be served from the Spring Boot application resources, using the same origin as the backend.
+The production API value is `/` because production builds are intended to use the same origin as the Spring Boot backend. The production UI base path is `/queryguard-ui/` because the built frontend is served from `resources/static/queryguard-ui/`.
 
 ## API Integration
 
@@ -183,9 +197,37 @@ npm run build
 
 The compiled static assets are emitted to `dist/`.
 
-Deploy the `dist/` directory to any static hosting platform that supports client-side routing. The host should route unknown paths such as `/dashboard` and `/trace/:traceId` back to `index.html`.
+Deploy the `dist/` directory to a static hosting location that matches `VITE_QUERYGUARD_UI_BASE_PATH`.
 
-For the intended Spring Boot deployment, copy the production build output into the Spring Boot app resources so `/queryguard/api/requests` and `/actuator/prometheus` resolve against the same origin. The production environment file sets `VITE_QUERYGUARD_API_BASE_URL=/` for this setup.
+For the intended Spring Boot deployment, copy the production build output into:
+
+```text
+src/main/resources/static/queryguard-ui/
+```
+
+Do not copy the production build files directly into `src/main/resources/static/` unless `VITE_QUERYGUARD_UI_BASE_PATH` is changed back to `/`.
+
+The resulting structure should look like:
+
+```text
+src/main/resources/static/queryguard-ui/
+├── index.html
+├── favicon.png
+├── logo.png
+└── assets/
+    ├── index-*.css
+    └── index-*.js
+```
+
+The app should be available at:
+
+```text
+http://localhost:8080/queryguard-ui/
+```
+
+If directly opening `/queryguard-ui/index.html`, the app redirects internally to `/queryguard-ui/`.
+
+For nested routes such as `/queryguard-ui/dashboard` and `/queryguard-ui/trace/:traceId`, Spring Boot must forward those routes to `/queryguard-ui/index.html`.
 
 ## Contributing
 
