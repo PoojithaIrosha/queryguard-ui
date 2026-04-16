@@ -594,10 +594,21 @@ export default function Dashboard() {
   const observedRequests = getCounterDelta(visiblePoints, "requestsTotal");
   const observedNplusOne = getCounterDelta(visiblePoints, "nplusOneTotal");
   const observedCriticals = getCounterDelta(visiblePoints, "criticalTotal");
+  const nplusOneRateRequestCount = traces.length > 0 ? traces.length : observedRequests;
+  const criticalTraceCount = traces.filter((trace) => trace.issues.length > 0).length;
+  const criticalRateRequestCount = traces.length > 0 ? traces.length : observedRequests;
+  const criticalAffectedRequestCount =
+    criticalTraceCount > 0
+      ? criticalTraceCount
+      : Math.min(observedCriticals, criticalRateRequestCount);
   const observedNplusOnePercent =
-    observedRequests > 0 ? (observedNplusOne / observedRequests) * 100 : 0;
+    nplusOneRateRequestCount > 0
+      ? Math.min((nplusOneTraceCount / nplusOneRateRequestCount) * 100, 100)
+      : 0;
   const observedCriticalPercent =
-    observedRequests > 0 ? (observedCriticals / observedRequests) * 100 : 0;
+    criticalRateRequestCount > 0
+      ? Math.min((criticalAffectedRequestCount / criticalRateRequestCount) * 100, 100)
+      : 0;
   const nplusOneRateSeries = getWindowRatePercent(
     visiblePoints,
     "nplusOneTotal",
@@ -702,7 +713,7 @@ export default function Dashboard() {
           <StatCard
             label="N+1 Rate"
             value={formatPercent(observedNplusOnePercent)}
-            helper={`${nplusOneTraceCount} N+1 request traces`}
+            helper={`${nplusOneTraceCount} of ${nplusOneRateRequestCount} requests affected`}
             tone={observedNplusOnePercent > 0 ? "warn" : "good"}
           />
           <StatCard
@@ -714,7 +725,7 @@ export default function Dashboard() {
           <StatCard
             label="Critical Rate"
             value={formatPercent(observedCriticalPercent)}
-            helper={`${traces.length} request traces`}
+            helper={`${criticalAffectedRequestCount} of ${criticalRateRequestCount} requests affected`}
             tone={observedCriticalPercent > 0 ? "danger" : "good"}
           />
         </div>
