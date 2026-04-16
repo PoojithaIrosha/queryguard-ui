@@ -237,10 +237,10 @@ For nested routes such as `/queryguard-ui/dashboard` and `/queryguard-ui/trace/:
 4. Run `npm run build` when changing TypeScript types, routing, data parsing, or production-facing behavior.
 5. Update this README and `docs/DEVELOPER_NOTES.md` when setup steps, backend contracts, or architecture decisions change.
 
-## License
-
-This project is licensed under the Apache License 2.0. See `LICENSE` for details.
-
 ## Additional Documentation
 
 - [Developer Notes](docs/DEVELOPER_NOTES.md)
+
+## License
+
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
